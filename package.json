@@ -1,0 +1,14 @@
+{
+  "name": "aoc23",
+  "version": "1.0.0",
+  "description": "Advent of Code 2023",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "@wijohnst",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "typescript": "^5.3.3"
+  }
+}

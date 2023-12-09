@@ -28,25 +28,14 @@ export const parseLines = (s: string): number[][] => {
     .filter((s) => s)
     .map((s) => dropLetters(s));
 
-  //   console.log(lines);
   return lines;
 };
 
-const nameToNumberMap: Record<string, string> = {
-  one: "1",
-  two: "2",
-  three: "3",
-  four: "4",
-  five: "5",
-  six: "6",
-  seven: "7",
-  eight: "8",
-  nine: "9",
-};
-
 export const dropLetters = (s: string): number[] => {
-  // handle sing character edge case
-  if (s.length === 1 && isNaN(Number(s))) return [0];
+  // handle single character edge case
+  if (s.length === 1 && isNaN(Number(s))) {
+    return [0];
+  }
 
   const parsedS = matchAndReplaceNumericChars(s);
   const nonNumericMatcher = new RegExp(/[^0-9]/, "g");
@@ -75,14 +64,55 @@ export const dropLetters = (s: string): number[] => {
   return q as number[];
 };
 
-export const matchAndReplaceNumericChars = (s: string): string => {
-  const numericMatcher = new RegExp(
-    /(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine)/,
-    "g"
-  );
+const nameToNumberMap: Record<string, string> = {
+  one: "1",
+  two: "2",
+  three: "3",
+  four: "4",
+  five: "5",
+  six: "6",
+  seven: "7",
+  eight: "8",
+  nine: "9",
+};
 
-  return s.replace(
+export const matchAndReplaceNumericChars = (s: string): string => {
+  let modifiedString = s;
+  const combinedMatchers = getComibnedMatcherArray(s);
+
+  if (combinedMatchers.length > 0) {
+    combinedMatchers.forEach((matcher: string) => {
+      modifiedString = s.replace(
+        matcher,
+        (match: keyof typeof combinedMatchersToValuesMap) =>
+          combinedMatchersToValuesMap[match]
+      );
+    });
+  }
+
+  const matchers = Object.keys(nameToNumberMap).join("|");
+  const numericMatcher = new RegExp(`(${matchers})`, "g");
+
+  return modifiedString.replace(
     numericMatcher,
     (match: keyof typeof nameToNumberMap) => nameToNumberMap[match]
   );
+};
+
+const combinedMatchersToValuesMap: Record<string, string> = {
+  twone: "21",
+  oneight: "18",
+  twoneight: "218",
+  sevenine: "79",
+  threeight: "38",
+  eightwo: "82",
+  threeeighttwo: "382",
+};
+
+export const getComibnedMatcherArray = (s: string): RegExpMatchArray | [] => {
+  const matcher = new RegExp(
+    `(${Object.keys(combinedMatchersToValuesMap).join("|")})`,
+    "g"
+  );
+  return s.match(matcher) ?? [];
 };

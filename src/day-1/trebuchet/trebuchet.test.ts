@@ -1,27 +1,20 @@
+import axios from "axios";
+import { config } from "dotenv";
+
 import {
   ITrebuchet,
   Trebuchet,
   parseLines,
   dropLetters,
   matchAndReplaceNumericChars,
+  getComibnedMatcherArray,
 } from "./trebuchet";
-
-import { originalDoc } from "./utils";
 
 const mockDocument = `
 a1b2
 c34d
 ef5g
 `;
-
-/*
-[
-[1,2],
-[3,4],
-[5, 5]
-]
-12 + 24 + 55 = 
-*/
 
 const mockDocument2 = `
 eightfivesssxxmgthreethreeone1sevenhnz
@@ -32,16 +25,29 @@ seven2jtgjltvzbcdnjtsfiveonebhkzld
 twothreesixeight6eight6
 nptjqqxoneninert1927
 `;
-/*
-[8,7],
-[6,3],
-[2,3],
-[5,5],
-[7,1],
-[2,6],
-[1,7]
+
+// Other test case from aoc
+const mockDocument3 = `
+two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+`;
+
+/* 
+[2,9]
+[8,3],
+[1,3],
+[2,4],
+[4,2],
+[1,4].
+[7,6] = 
 */
 
+config();
 describe("trebuchet", () => {
   let sut: ITrebuchet;
 
@@ -55,10 +61,26 @@ describe("trebuchet", () => {
       expect(sut.getSum()).toBe(101);
     });
 
-    it("✅ should return the correct sum", () => {
-      sut = new Trebuchet(originalDoc);
+    it("✅ should return the correct sum", async () => {
+      const input = await axios.get(
+        "https://adventofcode.com/2023/day/1/input",
+        {
+          headers: {
+            Cookie: `session=${process.env.SESSION}`,
+          },
+        }
+      );
+      sut = new Trebuchet(input.data);
 
-      expect(sut.getSum()).toEqual(342);
+      expect(sut.getSum()).not.toEqual(54780); //too hight
+      expect(sut.getSum()).not.toEqual(54491); //too low
+      expect(sut.getSum()).toEqual(54770);
+    });
+
+    it("✅ should return the correct sum - document 3", () => {
+      sut = new Trebuchet(mockDocument3);
+
+      expect(sut.getSum()).toEqual(281);
     });
   });
 });
@@ -100,6 +122,27 @@ describe("utils", () => {
     it("✅ should return the correct value", () => {
       expect(dropLetters("a1b2")).toEqual([1, 2]);
     });
+
+    const cases: [string, number[]][] = [
+      ["eightfivesssxxmgthreethreeone1sevenhnz", [8, 7]],
+      ["7beighttwob", [7, 2]],
+      ["jxcgpx5ninemsqqfmkpnj", [5, 9]],
+      ["7onesztpkqmjlfourhrrcf3threeone", [7, 1]],
+      ["7qcnb", [7, 7]],
+      ["hhtqxplnxconeninenine5sixxqgrjccpb3four", [1, 4]],
+      ["42", [4, 2]],
+      ["1sixbl9seventwotgtfcstqgv4lc", [1, 4]],
+      ["sevenjbs2fourmjglztjfive", [7, 5]],
+      ["8j", [8, 8]],
+      ["six33", [6, 3]],
+      ["5sixhxdjmkkmdbskls", [5, 6]],
+      ["t43", [4, 3]],
+      ["inesevensrzxkzpmgz8kcjxsbdftwoner", [7, 1]],
+    ];
+
+    test.each(cases)(`%p should be %p`, (testString, tuple) => {
+      expect(dropLetters(testString)).toEqual(tuple);
+    });
   });
 
   describe("matchAndReplaceNumericChars", () => {
@@ -107,11 +150,27 @@ describe("utils", () => {
       expect(matchAndReplaceNumericChars).toBeDefined();
     });
 
-    it("should return the correct string", () => {
-      const input = "9fourxxmdqmmlrbpqgznone8lvtxftmfpseven";
-      const result = "94xxmdqmmlrbpqgzn18lvtxftmfp7";
+    const cases: [string, string][] = [
+      ["dblfhbt7sevenninesix2threethree", "dblfhbt7796233"],
+      [
+        "9fourxxmdqmmlrbpqgznone8lvtxftmfpseven",
+        "94xxmdqmmlrbpqgzn18lvtxftmfp7",
+      ],
+      ["ninesevensrzxkzpmgz8kcjxsbdftwoner", "97srzxkzpmgz8kcjxsbdf21r"],
+    ];
 
-      expect(matchAndReplaceNumericChars(input)).toEqual(result);
+    test.each(cases)("%p should return %p", (input, output) => {
+      expect(matchAndReplaceNumericChars(input)).toEqual(output);
+    });
+  });
+
+  describe("includesComibedMatcher", () => {
+    it("✅ should be defined", () => {
+      expect(getComibnedMatcherArray).toBeDefined();
+    });
+
+    it("✅ should return true", () => {
+      expect(getComibnedMatcherArray("twone")).toEqual(["twone"]);
     });
   });
 });

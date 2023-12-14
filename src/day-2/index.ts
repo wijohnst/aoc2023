@@ -177,3 +177,37 @@ export const getSumOfValidGamesIds = (parsedGames: ParsedGame[]): number => {
     return sum;
   }, 0);
 };
+
+export const getPowerOfParsedGame = (parsedGame: ParsedGame): number => {
+  const values = Object.values(
+    getFewestNumberOfCubesFromRolls(parsedGame.rolls)
+  );
+
+  return values.reduce((power, value) => {
+    return power * value;
+  });
+};
+
+export const getFewestNumberOfCubesFromRolls = (rolls: Roll[]): Roll => {
+  return rolls.reduce(
+    (fewestNumberOfCubes: Roll, currentRoll: Roll, index) => {
+      if (index === 0) {
+        return currentRoll;
+      }
+
+      Object.entries(currentRoll).forEach(([key, value]) => {
+        if (fewestNumberOfCubes[key as Colors] < value) {
+          fewestNumberOfCubes[key as Colors] = value;
+        }
+      });
+      return fewestNumberOfCubes;
+    },
+    { red: 0, green: 0, blue: 0 }
+  );
+};
+
+export const getSumOfPowers = (powers: number[]): number => {
+  return powers.reduce((sumOfPowers: number, power: number) => {
+    return sumOfPowers + power;
+  }, 0);
+};

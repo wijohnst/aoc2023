@@ -17,6 +17,9 @@ import {
   IMatchParser,
   MatchParser,
   getSumOfValidGamesIds,
+  getPowerOfParsedGame,
+  getFewestNumberOfCubesFromRolls,
+  getSumOfPowers,
 } from "./index";
 config();
 
@@ -254,6 +257,48 @@ describe("Solution", () => {
     );
     const parsedGames = new MatchParser(data).getParsedGames();
 
+    const powers = parsedGames.map((parsedGame) => {
+      return getPowerOfParsedGame(parsedGame);
+    });
+
+    const result = getSumOfPowers(powers);
+
+    expect(result).not.toBe(51386);
+    expect(result).toBe(64097);
     expect(getSumOfValidGamesIds(parsedGames)).toBe(2265);
+  });
+});
+
+const parsedGame: ParsedGame = new GameParser(
+  defaultRawGameString
+).getParsedGame();
+describe("getPowerOfParsedGame", () => {
+  it("✅ should be defined", () => {
+    expect(getPowerOfParsedGame).toBeDefined();
+  });
+
+  it("✅ should returnt the correct power for the parsed game", () => {
+    expect(getPowerOfParsedGame(parsedGame)).toEqual(140);
+  });
+});
+
+describe("getFewestNumberOfCubesFromRoll", () => {
+  const result: Roll = {
+    red: 4,
+    green: 5,
+    blue: 7,
+  };
+  it("✅ should be defined", () => {
+    expect(getFewestNumberOfCubesFromRolls).toBeDefined();
+  });
+
+  it("✅ should return the fewest number of cubes from the Rolls", () => {
+    expect(getFewestNumberOfCubesFromRolls([parsedGame.rolls[0]])).toEqual(
+      parsedGame.rolls[0]
+    );
+  });
+
+  it("✅ should return the fewest number of cubes from the Rolls", () => {
+    expect(getFewestNumberOfCubesFromRolls(parsedGame.rolls)).toEqual(result);
   });
 });
